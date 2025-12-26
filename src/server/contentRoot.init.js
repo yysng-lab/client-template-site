@@ -1,6 +1,6 @@
-import path from "path";
 import { setContentRoot } from "@yysng/astro-boilerplate";
 
-setContentRoot(
-  path.resolve(process.cwd(), "src/content")
-);
+// Only configure content root when running in Node (local dev)
+if (typeof process !== "undefined" && process.versions?.node) {
+  setContentRoot(new URL("../content", import.meta.url).pathname);
+}
