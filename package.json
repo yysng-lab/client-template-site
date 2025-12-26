@@ -10,7 +10,7 @@
   },
   "dependencies": {
     "@astrojs/cloudflare": "^12.6.12",
-    "@yysng/astro-boilerplate": "^1.1.12",
+    "@yysng/astro-boilerplate": "^1.1.14",
     "astro": "^5.16.4",
     "dotenv": "^17.2.3",
     "openai": "^6.13.0"
