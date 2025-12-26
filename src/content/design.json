@@ -1,0 +1,10 @@
+{
+  "brand": {
+    "primaryColor": "#000000",
+    "fontScale": "lg"
+  },
+  "hero": {
+    "layout": "centered",
+    "maxWidth": "720px"
+  }
+}

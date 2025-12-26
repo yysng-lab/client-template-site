@@ -1,0 +1,14 @@
+---
+const { data } = Astro.props;
+---
+
+<section class="hero">
+  <h1 class="hero-title">{data.title}</h1>
+  <p class="hero-subtitle">{data.subtitle}</p>
+
+  {data.cta && (
+    <a class="hero-cta" href={data.cta.href}>
+      {data.cta.label}
+    </a>
+  )}
+</section>

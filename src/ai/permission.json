@@ -1,0 +1,11 @@
+{
+  "allowedEdits": [
+    "content.hero",
+    "content.design.hero"
+  ],
+  "forbidden": [
+    "src/components/**",
+    "src/layouts/**",
+    "astro.config.*"
+  ]
+}
