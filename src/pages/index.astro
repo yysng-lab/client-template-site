@@ -1,23 +1,59 @@
 ---
 import HeroSection from "../sections/HeroSection.astro";
+import TrustSection from "../sections/TrustSection.astro";
+import ServicesSection from "../sections/ServicesSection.astro";
 import CTASection from "../sections/CTASection.astro";
-import "../server/contentRoot.init.js";
+import TestimonialsSection from "../sections/TestimonialsSection.astro";
+import Footer from "../components/Footer.astro";
+import { theme } from "../config/theme.config";
 ---
 
 <html lang="en">
   <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width" />
-    <title>Astro Demo Site</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
   </head>
+  <body class="antialiased text-gray-900">
+    <main>
 
-  <body>
-    <h1>Astro Demo Site</h1>
+      <!-- Hero -->
+      <section class={`${theme.spacing.section} ${theme.colors.neutralBg}`}>
+        <div class={theme.spacing.container}>
+          <HeroSection />
+        </div>
+      </section>
 
-    <!-- REAL HERO -->
-    <HeroSection />
+      <!-- Trust / Benefits -->
+      <section class={`${theme.spacing.section} ${theme.colors.sectionBg}`}>
+        <div class={theme.spacing.container}>
+          <TrustSection />
+        </div>
+      </section>
 
-    <!-- REAL CTA -->
-    <CTASection />
+      <!-- Services -->
+      <section class={`${theme.spacing.section} ${theme.colors.neutralBg}`}>
+        <div class={theme.spacing.container}>
+          <ServicesSection />
+        </div>
+      </section>
+
+      <!-- Call to Action -->
+      <section class={`${theme.spacing.section} ${theme.colors.sectionBg}`}>
+        <div class={theme.spacing.container}>
+          <CTASection />
+        </div>
+      </section>
+
+      <!-- Testimonials -->
+      <section class={`${theme.spacing.section} ${theme.colors.neutralBg}`}>
+        <div class={theme.spacing.container}>
+          <TestimonialsSection />
+        </div>
+      </section>
+
+      <!-- Footer -->
+      <Footer />
+
+    </main>
   </body>
 </html>
