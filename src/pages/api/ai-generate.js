@@ -1,34 +1,25 @@
 export const prerender = false;
 
-import "dotenv/config";
 import OpenAI from "openai";
 import { loadContent } from "@yysng/astro-boilerplate";
 
-const client = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY
-});
-
-
-console.log("ENV KEY:", process.env.OPENAI_API_KEY);
-
 export async function POST({ request }) {
- 
-
   try {
-    const body = await request.json();
-    console.log("AI-GENERATE BODY:", body);
+    const { instruction, section } = await request.json();
 
-    if (!body.instruction || typeof body.instruction !== "string") {
-      return new Response(
-        JSON.stringify({ error: "Invalid instruction" }),
-        { status: 400 }
-      );
+    if (!instruction || typeof instruction !== "string") {
+      return new Response(JSON.stringify({ error: "Invalid instruction" }), { status: 400 });
     }
 
+    // Create client INSIDE handler (Worker-safe)
+    const client = new OpenAI({
+      apiKey: import.meta.env.OPENAI_API_KEY
+    });
+
     // ------------------------------
-    // CTA GENERATION (Option B)
+    // CTA GENERATION
     // ------------------------------
-    if (body.section === "cta") {
+    if (section === "cta") {
       const prompt = `
 You are an AI editor responsible for updating the CTA section of a website.
 
@@ -50,7 +41,7 @@ Return JSON ONLY in this exact format:
 }
 
 User instruction:
-${body.instruction}
+${instruction}
 `;
 
       const completion = await client.chat.completions.create({
@@ -64,7 +55,7 @@ ${body.instruction}
     }
 
     // ------------------------------
-    // HERO GENERATION (existing behavior)
+    // HERO GENERATION
     // ------------------------------
     const heroPrompt = `
 You are an AI editor responsible for updating the hero section of a website.
@@ -87,7 +78,7 @@ Return JSON ONLY in this exact format:
 }
 
 User instruction:
-${body.instruction}
+${instruction}
 `;
 
     const completion = await client.chat.completions.create({
@@ -102,9 +93,6 @@ ${body.instruction}
 
   } catch (err) {
     console.error("AI generate error:", err);
-    return new Response(
-      JSON.stringify({ error: "AI generation failed" }),
-      { status: 500 }
-    );
+    return new Response(JSON.stringify({ error: "AI generation failed" }), { status: 500 });
   }
 }
