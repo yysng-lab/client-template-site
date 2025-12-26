@@ -1,13 +1,6 @@
 export const prerender = false;
 
-import path from "path";
-import {
-  setContentRoot,
-  updateContent
-} from "@yysng/astro-boilerplate";
-
-// Configure content root ONCE per server runtime
-setContentRoot(path.resolve(process.cwd(), "src/content"));
+import { updateContent } from "@yysng/astro-boilerplate";
 
 export async function POST({ request }) {
   try {
@@ -21,13 +14,14 @@ export async function POST({ request }) {
       );
     }
 
-    // 🔒 All writes go through the boilerplate guardrail
-    await updateContent(section, content);
+    // Edge-safe: in-memory update only
+    const result = await updateContent(section, content);
 
     return new Response(
       JSON.stringify({
         success: true,
-        updated: section
+        updated: section,
+        result
       }),
       { status: 200 }
     );
