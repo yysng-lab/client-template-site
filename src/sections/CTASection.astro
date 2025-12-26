@@ -2,7 +2,8 @@
 import { loadContent } from "@yysng/astro-boilerplate";
 import { theme } from "../config/theme.config";
 
-const cta = await loadContent("cta");
+// Pass runtime env so production can use KV
+const cta = await loadContent("cta", Astro.locals.runtime.env);
 ---
 
 <section class="py-16 text-center bg-slate-100">
