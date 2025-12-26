@@ -1,19 +1,21 @@
 export const prerender = false;
 
 import OpenAI from "openai";
-import { loadContent } from "@yysng/astro-boilerplate";
 
-export async function POST({ request }) {
+export async function POST({ request, locals }) {
   try {
     const { instruction, section } = await request.json();
 
     if (!instruction || typeof instruction !== "string") {
-      return new Response(JSON.stringify({ error: "Invalid instruction" }), { status: 400 });
+      return new Response(
+        JSON.stringify({ error: "Invalid instruction" }),
+        { status: 400 }
+      );
     }
 
-    // Create client INSIDE handler (Worker-safe)
+    // ✅ Worker-safe: use Cloudflare runtime env
     const client = new OpenAI({
-      apiKey: import.meta.env.OPENAI_API_KEY
+      apiKey: locals.runtime.env.OPENAI_API_KEY
     });
 
     // ------------------------------
@@ -93,6 +95,9 @@ ${instruction}
 
   } catch (err) {
     console.error("AI generate error:", err);
-    return new Response(JSON.stringify({ error: "AI generation failed" }), { status: 500 });
+    return new Response(
+      JSON.stringify({ error: "AI generation failed", message: err.message }),
+      { status: 500 }
+    );
   }
 }

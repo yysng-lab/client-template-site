@@ -2,7 +2,7 @@ export const prerender = false;
 
 import { updateContent } from "@yysng/astro-boilerplate";
 
-export async function POST({ request }) {
+export async function POST({ request, locals }) {
   try {
     const body = await request.json();
     const { section, content } = body;
@@ -14,15 +14,11 @@ export async function POST({ request }) {
       );
     }
 
-    // Edge-safe: in-memory update only
-    const result = await updateContent(section, content);
+    // ✅ Pass Cloudflare runtime env
+    const result = await updateContent(section, content, locals.runtime.env);
 
     return new Response(
-      JSON.stringify({
-        success: true,
-        updated: section,
-        result
-      }),
+      JSON.stringify({ success: true, updated: section, result }),
       { status: 200 }
     );
 
@@ -30,10 +26,7 @@ export async function POST({ request }) {
     console.error("AI Edit Error:", error);
 
     return new Response(
-      JSON.stringify({
-        error: "Internal error",
-        message: error.message
-      }),
+      JSON.stringify({ error: "Internal error", message: error.message }),
       { status: 500 }
     );
   }
