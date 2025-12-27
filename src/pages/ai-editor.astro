@@ -1,12 +1,14 @@
 ---
+export const prerender = false;
+
 import HeroView from "../sections/HeroView.astro";
 import CTASection from "../sections/CTASection.astro";
 import { loadContent } from "@yysng/astro-boilerplate";
 
-const currentHero = await loadContent("hero");
-const currentCta = await loadContent("cta");
+const env = Astro.locals?.runtime?.env ?? {};
+const currentHero = await loadContent("hero", env);
+const currentCta = await loadContent("cta", env);
 ---
-
 <style>
   .page {
     max-width: 980px;
@@ -14,347 +16,121 @@ const currentCta = await loadContent("cta");
     padding: 2rem 1rem 4rem;
     font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
   }
-  .top {
-    margin-bottom: 2rem;
-  }
+  .top { margin-bottom: 2rem; }
   .panel {
     border: 1px solid #ddd;
     border-radius: 12px;
     padding: 1rem;
     margin-top: 1.5rem;
   }
-  .panel h2 {
-    margin: 0 0 0.75rem 0;
-  }
-  .controls {
-    display: flex;
-    gap: 0.5rem;
-    flex-wrap: wrap;
-    margin: 0.75rem 0 1rem;
-  }
-  .grid {
-    display: flex;
-    gap: 1rem;
-    align-items: flex-start;
-    flex-wrap: wrap;
-  }
+  .controls { display: flex; gap: 0.5rem; flex-wrap: wrap; margin: 0.75rem 0 1rem; }
+  .grid { display: flex; gap: 1rem; flex-wrap: wrap; }
   .box {
-    flex: 1;
-    min-width: 320px;
-    border: 1px solid #eee;
-    border-radius: 10px;
-    padding: 1rem;
-    background: #fff;
+    flex: 1; min-width: 320px; border: 1px solid #eee;
+    border-radius: 10px; padding: 1rem; background: #fff;
   }
-  .field {
-    width: 100%;
-    max-width: 760px;
-  }
-  .muted {
-    color: #666;
-    font-size: 0.95rem;
-  }
+  .field { width: 100%; max-width: 760px; }
+  .muted { color: #666; font-size: 0.95rem; }
   button {
-    padding: 0.45rem 0.8rem;
-    border-radius: 10px;
-    border: 1px solid #ddd;
-    background: #fff;
-    cursor: pointer;
+    padding: 0.45rem 0.8rem; border-radius: 10px;
+    border: 1px solid #ddd; background: #fff; cursor: pointer;
   }
-  button:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-  }
-  hr {
-    margin: 1.25rem 0;
-    border: none;
-    border-top: 1px solid #eee;
-  }
+  button:disabled { opacity: 0.5; cursor: not-allowed; }
+  hr { margin: 1.25rem 0; border: none; border-top: 1px solid #eee; }
 </style>
 
 <div class="page">
   <div class="top">
     <h1>AI Editor</h1>
-    <p class="muted">One instruction box, two sections. Use the buttons inside each section to generate/apply.</p>
-
-    <textarea
-      id="instruction"
-      rows="4"
-      class="field"
-      style="width:100%;"
-      placeholder="e.g. Make it coaching related, more premium, and more conversion-focused"
-    ></textarea>
-
-    <p id="status" class="muted" style="margin-top:0.75rem;"></p>
+    <textarea id="instruction" rows="4" class="field" placeholder="Describe your change..."></textarea>
+    <p id="status" class="muted"></p>
   </div>
 
-  <!-- ================= HERO ================= -->
+  <!-- HERO -->
   <section class="panel">
-    <h2>Hero Editor</h2>
-
+    <h2>Hero</h2>
     <div class="controls">
-      <button id="generateBtn">Generate Hero</button>
-      <button id="applyHeroBtn" disabled>Apply Hero</button>
-      <button id="resetHeroBtn" disabled>Reset Hero</button>
+      <button id="genHero">Generate</button>
+      <button id="saveHero" disabled>Apply</button>
     </div>
 
     <div class="grid">
-      <div class="box">
-        <h3>Current</h3>
-        <HeroView data={currentHero} />
-      </div>
-
-      <div class="box">
-        <h3>Draft</h3>
-        <div id="heroPreview">
-          <HeroView data={currentHero} />
-        </div>
-      </div>
+      <div class="box"><HeroView data={currentHero} /></div>
+      <div class="box"><div id="heroPreview"></div></div>
     </div>
-
-    <hr />
-
-    <h3>Edit Hero Draft</h3>
-    <input id="editTitle" class="field" placeholder="Hero title" />
-    <br /><br />
-    <textarea id="editSubtitle" class="field" rows="3" placeholder="Hero subtitle"></textarea>
-    <br /><br />
-    <input id="editHeroCtaLabel" class="field" placeholder="Hero CTA label" />
-    <br /><br />
-    <input id="editHeroCtaHref" class="field" placeholder="Hero CTA link" />
   </section>
 
-  <!-- ================= CTA ================= -->
+  <!-- CTA -->
   <section class="panel">
-    <h2>CTA Editor</h2>
-
+    <h2>CTA</h2>
     <div class="controls">
-      <button id="generateCtaBtn">Generate CTA</button>
-      <button id="applyCtaBtn" disabled>Apply CTA</button>
-      <button id="resetCtaBtn" disabled>Reset CTA</button>
+      <button id="genCta">Generate</button>
+      <button id="saveCta" disabled>Apply</button>
     </div>
 
     <div class="grid">
-      <div class="box">
-        <h3>Current</h3>
-        <CTASection />
-      </div>
-
-      <div class="box">
-        <h3>Draft</h3>
-        <div id="ctaPreview"></div>
-      </div>
+      <div class="box"><CTASection data={currentCta} /></div>
+      <div class="box"><div id="ctaPreview"></div></div>
     </div>
-
-    <hr />
-
-    <h3>Edit CTA Draft</h3>
-    <input id="editCtaHeading" class="field" placeholder="CTA heading" />
-    <br /><br />
-    <textarea id="editCtaDescription" class="field" rows="3" placeholder="CTA description"></textarea>
-    <br /><br />
-    <input id="editCtaBtnLabel" class="field" placeholder="CTA button label" />
-    <br /><br />
-    <input id="editCtaBtnHref" class="field" placeholder="CTA button link" />
   </section>
-
-  <!-- Serialize live data -->
-  <script type="application/json" id="liveHeroData" set:html={JSON.stringify(currentHero)}></script>
-  <script type="application/json" id="liveCtaData" set:html={JSON.stringify(currentCta)}></script>
 
   <script type="module">
+    const status = document.getElementById("status");
+
+    async function post(url, body) {
+      const r = await fetch(url, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
+      const j = await r.json().catch(() => ({}));
+      if (!r.ok) throw new Error(j.message || j.error || "Request failed");
+      return j;
+    }
+
     let heroDraft = null;
     let ctaDraft = null;
 
-    const liveHero = JSON.parse(document.getElementById("liveHeroData").textContent);
-    const liveCta = JSON.parse(document.getElementById("liveCtaData").textContent);
-
-    // Hero elements
     const heroPreview = document.getElementById("heroPreview");
-    const generateBtn = document.getElementById("generateBtn");
-    const applyHeroBtn = document.getElementById("applyHeroBtn");
-    const resetHeroBtn = document.getElementById("resetHeroBtn");
-
-    const editTitle = document.getElementById("editTitle");
-    const editSubtitle = document.getElementById("editSubtitle");
-    const editHeroCtaLabel = document.getElementById("editHeroCtaLabel");
-    const editHeroCtaHref = document.getElementById("editHeroCtaHref");
-
-    // CTA elements
     const ctaPreview = document.getElementById("ctaPreview");
-    const applyCtaBtn = document.getElementById("applyCtaBtn");
-    const resetCtaBtn = document.getElementById("resetCtaBtn");
 
-    const editCtaHeading = document.getElementById("editCtaHeading");
-    const editCtaDescription = document.getElementById("editCtaDescription");
-    const editCtaBtnLabel = document.getElementById("editCtaBtnLabel");
-    const editCtaBtnHref = document.getElementById("editCtaBtnHref");
-
-    const status = document.getElementById("status");
-
-    // ---------- HERO ----------
-    function renderHero(data) {
-      heroPreview.innerHTML = `
-        <section class="hero">
-          <h1>${data.title ?? ""}</h1>
-          <p>${data.subtitle ?? ""}</p>
-          ${data.cta ? `<a href="${data.cta.href}">${data.cta.label}</a>` : ""}
-        </section>
-      `;
+    function renderHero(d) {
+      heroPreview.innerHTML = `<h1>${d.title||""}</h1><p>${d.subtitle||""}</p>${d.cta?`<a href="${d.cta.href}">${d.cta.label}</a>`:""}`;
+    }
+    function renderCta(d) {
+      ctaPreview.innerHTML = `<h2>${d.heading||""}</h2><p>${d.description||""}</p><a href="${d.button?.href||"#"}">${d.button?.label||""}</a>`;
     }
 
-    generateBtn.addEventListener("click", async () => {
-      const instruction = document.getElementById("instruction").value.trim();
-      if (!instruction) return;
-
-      status.textContent = "Generating hero draft...";
-
-      const res = await fetch("/api/ai-generate", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ instruction })
-      });
-
-      heroDraft = await res.json();
-
-      editTitle.value = heroDraft.title ?? "";
-      editSubtitle.value = heroDraft.subtitle ?? "";
-      editHeroCtaLabel.value = heroDraft.cta?.label ?? "";
-      editHeroCtaHref.value = heroDraft.cta?.href ?? "";
-
-      renderHero(heroDraft);
-      applyHeroBtn.disabled = false;
-      resetHeroBtn.disabled = false;
-
-      status.textContent = "Hero draft ready";
-    });
-
-    [editTitle, editSubtitle, editHeroCtaLabel, editHeroCtaHref].forEach(input => {
-      input.addEventListener("input", () => {
-        if (!heroDraft) return;
-        heroDraft.title = editTitle.value;
-        heroDraft.subtitle = editSubtitle.value;
-        heroDraft.cta = {
-          label: editHeroCtaLabel.value,
-          href: editHeroCtaHref.value
-        };
+    document.getElementById("genHero").onclick = async () => {
+      try {
+        status.textContent = "Generating hero...";
+        heroDraft = await post("/api/ai-generate", { section: "hero", instruction: instruction.value });
         renderHero(heroDraft);
-      });
-    });
+        saveHero.disabled = false;
+        status.textContent = "Hero ready";
+      } catch(e){ status.textContent = e.message }
+    };
 
-    applyHeroBtn.addEventListener("click", async () => {
-      await fetch("/api/ai-edit", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ section: "hero", content: heroDraft })
-      });
-      status.textContent = "✅ Hero updated";
-    });
+    document.getElementById("saveHero").onclick = async () => {
+      try {
+        status.textContent = "Saving hero...";
+        await post("/api/ai-edit", { section: "hero", content: heroDraft });
+        location.reload();
+      } catch(e){ status.textContent = e.message }
+    };
 
-    resetHeroBtn.addEventListener("click", async () => {
-      heroDraft = structuredClone(liveHero);
-      editTitle.value = heroDraft.title ?? "";
-      editSubtitle.value = heroDraft.subtitle ?? "";
-      editHeroCtaLabel.value = heroDraft.cta?.label ?? "";
-      editHeroCtaHref.value = heroDraft.cta?.href ?? "";
-      renderHero(heroDraft);
-      status.textContent = "Hero reset to live content";
-    });
+    document.getElementById("genCta").onclick = async () => {
+      try {
+        status.textContent = "Generating CTA...";
+        ctaDraft = await post("/api/ai-generate", { section: "cta", instruction: instruction.value });
+        renderCta(ctaDraft);
+        saveCta.disabled = false;
+        status.textContent = "CTA ready";
+      } catch(e){ status.textContent = e.message }
+    };
 
-    // ---------- CTA ----------
-    function renderCta(data) {
-      ctaPreview.innerHTML = `
-        <section>
-          <h2>${data.heading ?? ""}</h2>
-          <p>${data.description ?? ""}</p>
-          <a href="${data.button?.href ?? "#"}">${data.button?.label ?? ""}</a>
-        </section>
-      `;
-    }
-
-    // Initialize CTA draft preview so it never looks "missing"
-    ctaDraft = structuredClone(liveCta);
-    editCtaHeading.value = ctaDraft.heading ?? "";
-    editCtaDescription.value = ctaDraft.description ?? "";
-    editCtaBtnLabel.value = ctaDraft.button?.label ?? "";
-    editCtaBtnHref.value = ctaDraft.button?.href ?? "";
-    renderCta(ctaDraft);
-
-    // Enable CTA buttons once draft exists
-    applyCtaBtn.disabled = false;
-    resetCtaBtn.disabled = false;
-
-    editCtaHeading.addEventListener("input", () => {
-      ctaDraft.heading = editCtaHeading.value;
-      renderCta(ctaDraft);
-    });
-
-    editCtaDescription.addEventListener("input", () => {
-      ctaDraft.description = editCtaDescription.value;
-      renderCta(ctaDraft);
-    });
-
-    editCtaBtnLabel.addEventListener("input", () => {
-      ctaDraft.button = ctaDraft.button ?? {};
-      ctaDraft.button.label = editCtaBtnLabel.value;
-      renderCta(ctaDraft);
-    });
-
-    editCtaBtnHref.addEventListener("input", () => {
-      ctaDraft.button = ctaDraft.button ?? {};
-      ctaDraft.button.href = editCtaBtnHref.value;
-      renderCta(ctaDraft);
-    });
-
-    applyCtaBtn.addEventListener("click", async () => {
-      await fetch("/api/ai-edit", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ section: "cta", content: ctaDraft })
-      });
-      status.textContent = "✅ CTA updated";
-    });
-
-    resetCtaBtn.addEventListener("click", async () => {
-      ctaDraft = structuredClone(liveCta);
-      editCtaHeading.value = ctaDraft.heading ?? "";
-      editCtaDescription.value = ctaDraft.description ?? "";
-      editCtaBtnLabel.value = ctaDraft.button?.label ?? "";
-      editCtaBtnHref.value = ctaDraft.button?.href ?? "";
-      renderCta(ctaDraft);
-      status.textContent = "CTA reset to live content";
-    });
-
-    const generateCtaBtn = document.getElementById("generateCtaBtn");
-
-    generateCtaBtn.addEventListener("click", async () => {
-      const instruction = document.getElementById("instruction").value.trim();
-      if (!instruction) return;
-
-      status.textContent = "Generating CTA...";
-
-      const res = await fetch("/api/ai-generate", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          section: "cta",
-          instruction
-        })
-      });
-
-      ctaDraft = await res.json();
-
-      editCtaHeading.value = ctaDraft.heading ?? "";
-      editCtaDescription.value = ctaDraft.description ?? "";
-      editCtaBtnLabel.value = ctaDraft.button?.label ?? "";
-      editCtaBtnHref.value = ctaDraft.button?.href ?? "";
-
-      renderCta(ctaDraft);
-
-      applyCtaBtn.disabled = false;
-      resetCtaBtn.disabled = false;
-
-      status.textContent = "CTA draft ready";
-    });
+    document.getElementById("saveCta").onclick = async () => {
+      try {
+        status.textContent = "Saving CTA...";
+        await post("/api/ai-edit", { section: "cta", content: ctaDraft });
+        location.reload();
+      } catch(e){ status.textContent = e.message }
+    };
   </script>
 </div>
