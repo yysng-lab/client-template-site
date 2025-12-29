@@ -3,7 +3,7 @@ export const prerender = false;
 
 import HeroView from "../sections/HeroView.astro";
 import CTASection from "../sections/CTASection.astro";
-import { loadContentSafe as loadContent } from "../lib/safeLoad.js";
+import { loadContent } from "@yysng/astro-boilerplate";
 
 const env = Astro.locals?.runtime?.env ?? {};
 const currentHero = await loadContent("hero", env);
@@ -11,16 +11,16 @@ const currentCta = await loadContent("cta", env);
 ---
 
 <style>
-  .page { max-width: 980px; margin: 0 auto; padding: 2rem 1rem 4rem; font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; }
-  .top { margin-bottom: 2rem; }
-  .panel { border: 1px solid #ddd; border-radius: 12px; padding: 1rem; margin-top: 1.5rem; }
-  .controls { display: flex; gap: .5rem; flex-wrap: wrap; margin: .75rem 0 1rem; }
-  .grid { display: flex; gap: 1rem; flex-wrap: wrap; }
-  .box { flex: 1; min-width: 320px; border: 1px solid #eee; border-radius: 10px; padding: 1rem; background: #fff; }
-  .field { width: 100%; max-width: 760px; }
-  .muted { color: #666; font-size: .95rem; }
-  button { padding: .45rem .8rem; border-radius: 10px; border: 1px solid #ddd; background: #fff; cursor: pointer; }
-  button:disabled { opacity: .5; cursor: not-allowed; }
+.page { max-width:980px;margin:0 auto;padding:2rem 1rem 4rem;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial }
+.top{margin-bottom:2rem}
+.panel{border:1px solid #ddd;border-radius:12px;padding:1rem;margin-top:1.5rem}
+.controls{display:flex;gap:.5rem;margin:.75rem 0 1rem}
+.grid{display:flex;gap:1rem;flex-wrap:wrap}
+.box{flex:1;min-width:320px;border:1px solid #eee;border-radius:10px;padding:1rem;background:#fff}
+.field{width:100%;max-width:760px}
+.muted{color:#666;font-size:.95rem}
+button{padding:.45rem .8rem;border-radius:10px;border:1px solid #ddd;background:#fff;cursor:pointer}
+button:disabled{opacity:.5;cursor:not-allowed}
 </style>
 
 <div class="page">
@@ -38,11 +38,16 @@ const currentCta = await loadContent("cta", env);
       <button id="applyHero" disabled>Apply</button>
       <button id="resetHero" disabled>Reset</button>
     </div>
-
     <div class="grid">
       <div class="box"><HeroView data={currentHero} /></div>
       <div class="box"><div id="heroPreview"></div></div>
     </div>
+
+    <h3>Manual Override</h3>
+    <input id="editTitle" class="field" placeholder="Title">
+    <textarea id="editSubtitle" class="field" rows="3" placeholder="Subtitle"></textarea>
+    <input id="editCtaLabel" class="field" placeholder="CTA Label">
+    <input id="editCtaHref" class="field" placeholder="CTA Link">
   </section>
 
   <!-- CTA -->
@@ -53,105 +58,152 @@ const currentCta = await loadContent("cta", env);
       <button id="applyCta" disabled>Apply</button>
       <button id="resetCta" disabled>Reset</button>
     </div>
-
     <div class="grid">
       <div class="box"><CTASection data={currentCta} /></div>
       <div class="box"><div id="ctaPreview"></div></div>
     </div>
+
+    <h3>Manual Override</h3>
+    <input id="editCtaHeading" class="field" placeholder="Heading">
+    <textarea id="editCtaDescription" class="field" rows="3" placeholder="Description"></textarea>
+    <input id="editCtaBtnLabel" class="field" placeholder="Button Label">
+    <input id="editCtaBtnHref" class="field" placeholder="Button Link">
   </section>
 
-  <!-- SAFE DATA BRIDGE -->
-  <script type="application/json" id="liveHeroData" set:html={JSON.stringify(currentHero)}></script>
-  <script type="application/json" id="liveCtaData" set:html={JSON.stringify(currentCta)}></script>
+<script type="application/json" id="liveHeroData" set:html={JSON.stringify(currentHero)}></script>
+<script type="application/json" id="liveCtaData" set:html={JSON.stringify(currentCta)}></script>
 
-  <script type="module">
-    const status = document.getElementById("status");
-    const instruction = document.getElementById("instruction");
+<script type="module">
+const $ = id => document.getElementById(id);
+const status = $("status");
 
-    const genHero = document.getElementById("genHero");
-    const applyHero = document.getElementById("applyHero");
-    const resetHero = document.getElementById("resetHero");
+let liveHero = JSON.parse($("liveHeroData").textContent);
+let liveCta  = JSON.parse($("liveCtaData").textContent);
+let heroDraft = structuredClone(liveHero);
+let ctaDraft  = structuredClone(liveCta);
 
-    const genCta = document.getElementById("genCta");
-    const applyCta = document.getElementById("applyCta");
-    const resetCta = document.getElementById("resetCta");
+const renderHero = d => $("heroPreview").innerHTML =
+  `<h1>${d.title||""}</h1><p>${d.subtitle||""}</p>${d.cta?`<a href="${d.cta.href}">${d.cta.label}</a>`:""}`;
 
-    const heroPreview = document.getElementById("heroPreview");
-    const ctaPreview = document.getElementById("ctaPreview");
+const renderCta = d => $("ctaPreview").innerHTML =
+  `<h2>${d.heading||""}</h2><p>${d.description||""}</p><a href="${d.button?.href||"#"}">${d.button?.label||""}</a>`;
 
-    const liveHero = JSON.parse(document.getElementById("liveHeroData").textContent);
-    const liveCta  = JSON.parse(document.getElementById("liveCtaData").textContent);
+const syncHeroForm = ()=>{
+  $("editTitle").value = heroDraft.title||"";
+  $("editSubtitle").value = heroDraft.subtitle||"";
+  $("editCtaLabel").value = heroDraft.cta?.label||"";
+  $("editCtaHref").value = heroDraft.cta?.href||"";
+};
 
-    let heroDraft = structuredClone(liveHero);
-    let ctaDraft  = structuredClone(liveCta);
+const syncCtaForm = ()=>{
+  $("editCtaHeading").value = ctaDraft.heading||"";
+  $("editCtaDescription").value = ctaDraft.description||"";
+  $("editCtaBtnLabel").value = ctaDraft.button?.label||"";
+  $("editCtaBtnHref").value = ctaDraft.button?.href||"";
+};
 
-    function renderHero(d){ heroPreview.innerHTML = `<h1>${d.title||""}</h1><p>${d.subtitle||""}</p>${d.cta?`<a href="${d.cta.href}">${d.cta.label}</a>`:""}` }
-    function renderCta(d){ ctaPreview.innerHTML = `<h2>${d.heading||""}</h2><p>${d.description||""}</p><a href="${d.button?.href||"#"}">${d.button?.label||""}</a>` }
+renderHero(heroDraft);
+renderCta(ctaDraft);
+syncHeroForm();
+syncCtaForm();
 
-    renderHero(heroDraft);
-    renderCta(ctaDraft);
+async function post(url, body){
+  const r = await fetch(url,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)});
+  const j = await r.json();
+  if(!r.ok) throw new Error(j.message||j.error);
+  return j;
+}
 
-    async function post(url, body){
-      const r = await fetch(url,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)});
-      const j = await r.json().catch(()=>({}));
-      if(!r.ok) throw new Error(j.message||j.error||"Request failed");
-      return j;
-    }
+// HERO
+$("genHero").onclick = async()=>{
+  const text = $("instruction").value.trim();
+  if(!text) return status.textContent="Enter an instruction";
+  heroDraft = await post("/api/ai-generate",{section:"hero",instruction:text});
+  renderHero(heroDraft); syncHeroForm();
+  $("applyHero").disabled=false; $("resetHero").disabled=false;
+  status.textContent="Hero ready";
+};
 
-    // HERO
-    genHero.onclick = async ()=>{
-      try{
-        status.textContent="Generating hero...";
-        heroDraft = await post("/api/ai-generate",{section:"hero",instruction:instruction.value});
-        renderHero(heroDraft);
-        applyHero.disabled=false;
-        resetHero.disabled=false;
-        status.textContent="Hero ready";
-      }catch(e){ status.textContent=e.message }
-    };
+$("applyHero").onclick = async()=>{
+  const res = await post("/api/ai-edit",{section:"hero",content:heroDraft});
+  liveHero = structuredClone(res.result);
+  heroDraft = structuredClone(liveHero);
+  renderHero(heroDraft);
+  status.textContent="Hero saved";
+};
 
-    applyHero.onclick = async ()=>{
-      try{
-        status.textContent="Saving hero...";
-        const res = await post("/api/ai-edit",{section:"hero",content:heroDraft});
-        heroDraft = structuredClone(res.result);
-        renderHero(heroDraft);
-        status.textContent="Hero saved";
-      }catch(e){ status.textContent=e.message }
-    };
+$("resetHero").onclick = ()=>{
+  heroDraft = structuredClone(liveHero);
+  renderHero(heroDraft); syncHeroForm();
+};
 
-    resetHero.onclick = ()=>{
-      heroDraft = structuredClone(liveHero);
-      renderHero(heroDraft);
-      status.textContent="Hero reset";
-    };
+// CTA
+$("genCta").onclick = async()=>{
+  const text = $("instruction").value.trim();
+  if(!text) return status.textContent="Enter an instruction";
+  ctaDraft = await post("/api/ai-generate",{section:"cta",instruction:text});
+  renderCta(ctaDraft); syncCtaForm();
+  $("applyCta").disabled=false; $("resetCta").disabled=false;
+  status.textContent="CTA ready";
+};
 
-    // CTA
-    genCta.onclick = async ()=>{
-      try{
-        status.textContent="Generating CTA...";
-        ctaDraft = await post("/api/ai-generate",{section:"cta",instruction:instruction.value});
-        renderCta(ctaDraft);
-        applyCta.disabled=false;
-        resetCta.disabled=false;
-        status.textContent="CTA ready";
-      }catch(e){ status.textContent=e.message }
-    };
+$("applyCta").onclick = async()=>{
+  const res = await post("/api/ai-edit",{section:"cta",content:ctaDraft});
+  liveCta = structuredClone(res.result);
+  ctaDraft = structuredClone(liveCta);
+  renderCta(ctaDraft);
+  status.textContent="CTA saved";
+};
 
-    applyCta.onclick = async ()=>{
-      try{
-        status.textContent="Saving CTA...";
-        const res = await post("/api/ai-edit",{section:"cta",content:ctaDraft});
-        ctaDraft = structuredClone(res.result);
-        renderCta(ctaDraft);
-        status.textContent="CTA saved";
-      }catch(e){ status.textContent=e.message }
-    };
+$("resetCta").onclick = ()=>{
+  ctaDraft = structuredClone(liveCta);
+  renderCta(ctaDraft); syncCtaForm();
+};
+// ----- Manual override bindings (HERO) -----
+$("editTitle").oninput = () => {
+  heroDraft.title = $("editTitle").value;
+  renderHero(heroDraft);
+};
 
-    resetCta.onclick = ()=>{
-      ctaDraft = structuredClone(liveCta);
-      renderCta(ctaDraft);
-      status.textContent="CTA reset";
-    };
-  </script>
+$("editSubtitle").oninput = () => {
+  heroDraft.subtitle = $("editSubtitle").value;
+  renderHero(heroDraft);
+};
+
+$("editCtaLabel").oninput = () => {
+  heroDraft.cta ??= {};
+  heroDraft.cta.label = $("editCtaLabel").value;
+  renderHero(heroDraft);
+};
+
+$("editCtaHref").oninput = () => {
+  heroDraft.cta ??= {};
+  heroDraft.cta.href = $("editCtaHref").value;
+  renderHero(heroDraft);
+};
+
+// ----- Manual override bindings (CTA) -----
+$("editCtaHeading").oninput = () => {
+  ctaDraft.heading = $("editCtaHeading").value;
+  renderCta(ctaDraft);
+};
+
+$("editCtaDescription").oninput = () => {
+  ctaDraft.description = $("editCtaDescription").value;
+  renderCta(ctaDraft);
+};
+
+$("editCtaBtnLabel").oninput = () => {
+  ctaDraft.button ??= {};
+  ctaDraft.button.label = $("editCtaBtnLabel").value;
+  renderCta(ctaDraft);
+};
+
+$("editCtaBtnHref").oninput = () => {
+  ctaDraft.button ??= {};
+  ctaDraft.button.href = $("editCtaBtnHref").value;
+  renderCta(ctaDraft);
+};
+
+</script>
 </div>

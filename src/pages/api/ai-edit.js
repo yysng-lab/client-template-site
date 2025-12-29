@@ -1,6 +1,8 @@
 export const prerender = false;
 
-import { loadContentSafe as loadContent } from "../../lib/safeLoad.js";
+import * as Engine from "@yysng/astro-boilerplate";
+
+const { updateContent } = Engine;
 
 export async function POST({ request, locals }) {
   try {
