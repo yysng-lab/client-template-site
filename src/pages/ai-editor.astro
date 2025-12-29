@@ -3,7 +3,7 @@ export const prerender = false;
 
 import HeroView from "../sections/HeroView.astro";
 import CTASection from "../sections/CTASection.astro";
-import { loadContent } from "@yysng/astro-boilerplate";
+import { loadContentSafe as loadContent } from "../lib/safeLoad.js";
 
 const env = Astro.locals?.runtime?.env ?? {};
 const currentHero = await loadContent("hero", env);

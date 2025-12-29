@@ -1,5 +1,5 @@
 ---
-import { loadContent } from "@yysng/astro-boilerplate";
+import { loadContentSafe as loadContent } from "../lib/safeLoad.js";
 const { data } = Astro.props;
 
 const env = Astro.locals?.runtime?.env ?? {};
