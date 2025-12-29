@@ -1,6 +1,6 @@
 export const prerender = false;
 
-import { loadContentSafe as loadContent } from "../lib/safeLoad.js";
+import { loadContentSafe as loadContent } from "../../lib/safeLoad.js";
 
 export async function POST({ request, locals }) {
   try {
