@@ -1,8 +1,8 @@
 {
-  "title": "Unleash Your Natural Beauty Medicube",
-  "subtitle": "Discover high-quality, eco-friendly beauty products tailored for you.",
+  "title": "Current Client Overview",
+  "subtitle": "Manage your client relationships effectively",
   "cta": {
-    "label": "Shop Medicube Now",
-    "href": "/shop"
+    "label": "View Client Details",
+    "href": "/clients/details"
   }
 }

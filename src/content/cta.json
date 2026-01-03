@@ -1,8 +1,8 @@
 {
-  "heading": "Unlock Your Natural Beauty with Medicube",
-  "description": "Explore our range of organic beauty products designed to enhance your natural glow. Join our community of beauty enthusiasts today!",
+  "heading": "Welcome to Our Services",
+  "description": "We provide top-notch solutions tailored to your needs. Discover how we can help your business thrive.",
   "button": {
-    "label": "Shop Now immediately",
-    "href": "/shop"
+    "label": "Learn More",
+    "href": "/services"
   }
 }

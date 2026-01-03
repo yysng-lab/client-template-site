@@ -1,11 +1,8 @@
 ---
 import { loadContent } from "@yysng/astro-boilerplate";
 import HeroView from "./HeroView.astro";
-import { theme } from "../config/theme.config";
 
 const { data } = Astro.props;
-
-// Pass Cloudflare runtime env into loader
 const content = data ?? await loadContent("hero", Astro.locals.runtime.env);
 ---
 

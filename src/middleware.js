@@ -1,5 +1,6 @@
-import "./server/contentRoot.init.js";
+import { initContentRoot } from "./server/content-root.ts";
 
-export async function onRequest({ request, locals }, next) {
+export async function onRequest(context, next) {
+  initContentRoot();
   return next();
 }

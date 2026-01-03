@@ -1,19 +1,21 @@
 ---
 import { loadContent } from "@yysng/astro-boilerplate";
-const { data } = Astro.props;
 
+const { data } = Astro.props;
 const env = Astro.locals?.runtime?.env ?? {};
 const cta = data ?? await loadContent("cta", env);
 ---
 
 <section class="py-16 text-center bg-slate-100">
-  <h2 class="text-3xl font-bold">{cta.heading}</h2>
+  <h2 class="text-3xl font-bold" data-cta-heading>{cta.heading}</h2>
 
   {cta.description && (
-    <p class="mt-3 text-slate-600">{cta.description}</p>
+    <p class="mt-3 text-slate-600" data-cta-description>{cta.description}</p>
   )}
 
-  <a href={cta.button.href} class="mt-6 inline-block rounded-lg bg-black px-6 py-3 text-white">
+  <a href={cta.button.href}
+     class="mt-6 inline-block rounded-lg bg-black px-6 py-3 text-white"
+     data-cta-button>
     {cta.button.label}
   </a>
 </section>

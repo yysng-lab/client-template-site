@@ -1,34 +1,27 @@
-export const prerender = false;
+import { updateContent } from "@yysng/astro-boilerplate";
 
-import * as Engine from "@yysng/astro-boilerplate";
+export async function POST({ request }) {
+  let body;
 
-const { updateContent } = Engine;
-
-export async function POST({ request, locals }) {
   try {
-    const body = await request.json();
-    const { section, content } = body;
+    body = await request.json();
+  } catch {
+    return new Response(JSON.stringify({ error: "Invalid JSON body" }), { status: 400 });
+  }
 
-    if (!section || !content) {
-      return new Response(
-        JSON.stringify({ error: "Missing section or content" }),
-        { status: 400 }
-      );
-    }
+  const { section, content } = body || {};
 
-    // ✅ Pass Cloudflare runtime env
-    const result = await updateContent(section, content, locals.runtime.env);
+  if (!section || !content) {
+    return new Response(JSON.stringify({ error: "Missing section or content" }), { status: 400 });
+  }
 
+  try {
+    const result = await updateContent(section, content);
+    return Response.json({ ok: true, result });
+  } catch (err) {
+    console.error("AI Edit failed:", err);
     return new Response(
-      JSON.stringify({ success: true, updated: section, result }),
-      { status: 200 }
-    );
-
-  } catch (error) {
-    console.error("AI Edit Error:", error);
-
-    return new Response(
-      JSON.stringify({ error: "Internal error", message: error.message }),
+      JSON.stringify({ error: "Write failed", message: err.message }),
       { status: 500 }
     );
   }
